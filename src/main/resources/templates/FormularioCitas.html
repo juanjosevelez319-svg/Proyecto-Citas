@@ -1,12 +1,16 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      lang="es">
+
 <head>
 
     <meta charset="UTF-8">
 
     <title>Nueva Cita</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
 
 </head>
 
@@ -19,17 +23,23 @@
         <div class="card-header bg-primary text-white">
 
             <h3 class="text-center">
-
                 Registrar Cita
-
             </h3>
 
         </div>
 
-        <div class="alert alert-danger" th:if="${error}">
-         <strong>Error:</strong>
-         <span th:text="${error}"></span>
+
+        <!-- MENSAJE DE ERROR -->
+
+        <div class="alert alert-danger m-3"
+             th:if="${error}">
+
+            <strong>Error:</strong>
+
+            <span th:text="${error}"></span>
+
         </div>
+
 
         <div class="card-body">
 
@@ -40,18 +50,24 @@
                 <input type="hidden"
                        th:field="*{id}">
 
-                <div sec:authorize="hasRole('ADMIN')" class="mb-3">
+
+                <!-- ========================= -->
+                <!-- USUARIO -->
+                <!-- ========================= -->
+
+                <div sec:authorize="hasRole('ADMIN')"
+                     class="mb-3">
 
                     <label class="form-label">
-
                         Usuario
-
                     </label>
 
                     <select class="form-select"
                             th:field="*{usuario}">
 
-                        <option value="">Seleccione un usuario</option>
+                        <option value="">
+                            Seleccione un usuario
+                        </option>
 
                         <option th:each="usuario : ${usuarios}"
                                 th:value="${usuario.id}"
@@ -62,18 +78,27 @@
 
                 </div>
 
+
+                <!-- ========================= -->
+                <!-- MÉDICO -->
+                <!-- ========================= -->
+
                 <div class="mb-3">
 
-                    <label class="form-label">
+                    <label for="medicoSelect"
+                           class="form-label">
 
                         Médico
 
                     </label>
 
-                    <select class="form-select"
-                            th:field="*{medico}">
+                    <select id="medicoSelect"
+                            class="form-select"
+                            required>
 
-                        <option value="">Seleccione un médico</option>
+                        <option value="">
+                            Seleccione un médico
+                        </option>
 
                         <option th:each="medico : ${medicos}"
                                 th:value="${medico.id}"
@@ -84,34 +109,57 @@
 
                 </div>
 
+
+                <!-- ========================= -->
+                <!-- HORARIO -->
+                <!-- ========================= -->
+
                 <div class="mb-3">
 
-                    <label class="form-label">
+                    <label for="horarioSelect"
+                           class="form-label">
 
-                        Horario
+                        Horario disponible
 
                     </label>
 
-                    <select class="form-select"
-                            th:field="*{horario}">
+                    <select id="horarioSelect"
+                            class="form-select"
+                            th:field="*{horario}"
+                            required>
 
-                        <option value="">Seleccione un horario</option>
+                        <option value="">
+                            Primero seleccione un médico
+                        </option>
 
                         <option th:each="horario : ${horarios}"
                                 th:value="${horario.idHorario}"
-                                th:text="${horario.medico.nombre + ' - ' + horario.diaSemana + ' ' + horario.horaInicio}">
+                                th:data-medico="${horario.medico.id}"
+                                th:data-disponible="${horario.disponible}"
+                                th:text="${#temporals.format(horario.fecha, 'dd/MM/yyyy') + ' - ' + #temporals.format(horario.horaInicio, 'hh:mm a') + ' - ' + #temporals.format(horario.horaFin, 'hh:mm a')}">
                         </option>
 
                     </select>
 
+                    <div class="form-text">
+
+                        Seleccione primero un médico para mostrar
+                        sus horarios disponibles.
+
+                    </div>
+
                 </div>
 
-                <div class="mb-3">
+
+                <!-- ========================= -->
+                <!-- ESTADO -->
+                <!-- ========================= -->
+
+                <div class="mb-3"
+                     sec:authorize="hasRole('ADMIN')">
 
                     <label class="form-label">
-
                         Estado
-
                     </label>
 
                     <select class="form-select"
@@ -132,6 +180,11 @@
                     </select>
 
                 </div>
+
+
+                <!-- ========================= -->
+                <!-- BOTONES -->
+                <!-- ========================= -->
 
                 <button type="submit"
                         class="btn btn-success">
@@ -155,6 +208,84 @@
 
 </div>
 
+
+<!-- ========================= -->
+<!-- FILTRO DE HORARIOS -->
+<!-- ========================= -->
+
+<script>
+
+    const medicoSelect =
+        document.getElementById("medicoSelect");
+
+    const horarioSelect =
+        document.getElementById("horarioSelect");
+
+
+    // Guardamos todas las opciones originales
+    const horariosOriginales =
+        Array.from(
+            horarioSelect.querySelectorAll("option")
+        ).slice(1);
+
+
+    medicoSelect.addEventListener("change", function () {
+
+        const medicoSeleccionado =
+            this.value;
+
+
+        // Limpiar horarios actuales
+        horarioSelect.innerHTML = "";
+
+
+        // Opción inicial
+        const opcionInicial =
+            document.createElement("option");
+
+        opcionInicial.value = "";
+
+        opcionInicial.textContent =
+            medicoSeleccionado
+                ? "Seleccione un horario"
+                : "Primero seleccione un médico";
+
+        horarioSelect.appendChild(opcionInicial);
+
+
+        // Si no seleccionó médico
+        if (!medicoSeleccionado) {
+            return;
+        }
+
+
+        // Filtrar horarios
+        horariosOriginales.forEach(function (opcion) {
+
+            const medicoHorario =
+                opcion.dataset.medico;
+
+            const disponible =
+                opcion.dataset.disponible === "true";
+
+
+            if (medicoHorario === medicoSeleccionado
+                && disponible) {
+
+                horarioSelect.appendChild(
+                    opcion.cloneNode(true)
+                );
+
+            }
+
+        });
+
+    });
+
+</script>
+
+
 </body>
+
 </html>
 

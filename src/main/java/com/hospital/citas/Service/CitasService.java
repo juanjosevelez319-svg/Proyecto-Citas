@@ -182,29 +182,62 @@ public class CitasService {
         }
 
         if (!usuario.getRol().equals("ROLE_ADMIN")) {
-        if (!cita.getUsuario().getId().equals(usuario.getId())) {
-            return false;
+            if (!cita.getUsuario().getId().equals(usuario.getId())) {
+              return false;
+            }
         }
+
+        Horarios horario = cita.getHorario();
+
+        // Validar que el horario tenga información válida
+    if (horario == null ||
+        horario.getFecha() == null ||
+        horario.getHoraInicio() == null) {
+
+        throw new IllegalArgumentException(
+            "El horario de esta cita no tiene una fecha y hora válidas."
+        );
     }
 
-        // Cambiar estado de la cita
-        cita.setEstado(EstadoCita.CANCELADA);
-        citaRepository.save(cita);
+    // Construir fecha y hora real de la cita
+    LocalDateTime inicioCita =
+        LocalDateTime.of(
+            horario.getFecha(),
+            horario.getHoraInicio()
+        );
 
-        boolean ocupado = citaRepository.existsByHorarioAndEstadoIn(
-        cita.getHorario(),
-        Arrays.asList(
+    // No permitir cancelar una cita que ya comenzó
+    if (!LocalDateTime.now().isBefore(inicioCita)) {
+
+        throw new IllegalArgumentException(
+            "No se puede cancelar una cita que ya comenzó o ya pasó."
+        );
+    }
+
+    // Cambiar estado de la cita
+    cita.setEstado(EstadoCita.CANCELADA);
+
+    citaRepository.save(cita);
+
+    // Verificar si todavía existe otra cita activa
+    // para el mismo horario
+    boolean ocupado =
+        citaRepository.existsByHorarioAndEstadoIn(
+            horario,
+            Arrays.asList(
                 EstadoCita.PENDIENTE,
-                EstadoCita.CONFIRMADA));
+                EstadoCita.CONFIRMADA
+            )
+        );
 
-       if (!ocupado) {
+    // Si no quedan citas activas, liberar el horario
+    if (!ocupado) {
 
-         Horarios horario = cita.getHorario();
-         horario.setDisponible(true);
+        horario.setDisponible(true);
 
-         horarioRepository.save(horario);
+        horarioRepository.save(horario);
+    }
 
-      }
-        return true;
+    return true;
     }
 }

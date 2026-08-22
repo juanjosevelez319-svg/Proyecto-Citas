@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.hospital.citas.Model.Citas;
 import com.hospital.citas.Model.Horarios;
@@ -42,100 +43,206 @@ public class CitaController {
 
     }
 
-
+    // =========================
+    // LISTAR CITAS
+    // =========================
 
     @GetMapping
-    public String listar(Model model) {
+    public String listarCitas(Model model) {
 
-        model.addAttribute("citas", citaService.listarTodas());
+        model.addAttribute(
+            "citas",
+            citaService.listarTodas()
+        );
 
-       return "ListaCitas";
-
+        return "ListaCitas";
     }
+
+
+    // =========================
+    // NUEVA CITA
+    // =========================
 
     @GetMapping("/nuevaCita")
-    public String formulario(Model model) {
+    public String nuevaCita(Model model) {
 
-        model.addAttribute("cita", new Citas());
+        model.addAttribute(
+            "cita",
+            new Citas()
+        );
 
-        model.addAttribute("usuarios", usuarioService.listarTodos());
+        model.addAttribute(
+            "horarios",
+            horarioService.listarHorarios()
+        );
 
-        model.addAttribute("medicos", medicoService.listarTodas());
+        model.addAttribute(
+            "medicos",
+            medicoService.listarTodas()
+        );
 
-        model.addAttribute("horarios", horarioService.listarHorarios());
+        model.addAttribute(
+            "usuarios",
+             usuarioService.listarTodos()
+        );
 
         return "FormularioCitas";
-
     }
+
+
+    // =========================
+    // GUARDAR CITA
+    // =========================
 
     @PostMapping("/guardarCita")
-    public String guardar(@ModelAttribute Citas cita, Model model, Authentication authentication) {
+    public String guardar(
+        @ModelAttribute Citas cita,
+        Authentication authentication,
+        RedirectAttributes redirectAttributes) {
 
-         try {
+    try {
 
-        Usuario usuario = usuarioService.obtenerPorCorreo(authentication.getName());
+        // Usuario actualmente autenticado
+        Usuario usuarioActual =
+            usuarioService.obtenerPorCorreo(
+                authentication.getName()
+            );
 
-        // Si no es administrador, la cita siempre será para él mismo
-        if (!"ROLE_ADMIN".equals(usuario.getRol())) {
-            cita.setUsuario(usuario);
+        /*
+         * Si el usuario es ADMIN:
+         * se utiliza el usuario seleccionado
+         * en el formulario.
+         */
+        if (usuarioActual.getRol().equals("ROLE_ADMIN")) {
+
+            if (cita.getUsuario() == null ||
+                cita.getUsuario().getId() == null) {
+
+                throw new IllegalArgumentException(
+                    "Debe seleccionar un usuario."
+                );
+            }
+
+            Usuario usuarioSeleccionado =
+                usuarioService.obtenerPorId(
+                    cita.getUsuario().getId()
+                );
+
+            if (usuarioSeleccionado == null) {
+
+                throw new IllegalArgumentException(
+                    "El usuario seleccionado no existe."
+                );
+            }
+
+            cita.setUsuario(usuarioSeleccionado);
+
+        } else {
+
+            /*
+             * Los usuarios normales solamente
+             * pueden crear citas para ellos mismos.
+             */
+            cita.setUsuario(usuarioActual);
         }
 
+        // Guardar aplicando las validaciones del Service
         citaService.guardar(cita);
 
+        redirectAttributes.addFlashAttribute(
+            "mensaje",
+            "Cita creada correctamente."
+        );
+
         return "redirect:/citas";
 
-    } catch (RuntimeException e) {
+    } catch (IllegalArgumentException e) {
 
-        model.addAttribute("error", e.getMessage());
+        redirectAttributes.addFlashAttribute(
+            "error",
+            e.getMessage()
+        );
 
-        model.addAttribute("cita", cita);
-        model.addAttribute("usuarios", usuarioService.listarTodos());
-        model.addAttribute("medicos", medicoService.listarTodas());
-        model.addAttribute("horarios", horarioService.listarHorarios());
-
-        return "FormularioCitas";
+        return "redirect:/citas/nuevaCita";
+    }
     }
 
-    }
+
+    // =========================
+    // CONFIRMAR CITA
+    // =========================
 
     @GetMapping("/confirmarCita/{id}")
-    public String confirmar(@PathVariable Long id) {
+    public String confirmar(
+            @PathVariable Long id,
+            RedirectAttributes redirectAttributes) {
 
-        citaService.confirmar(id);
+        try {
+
+            citaService.confirmar(id);
+
+            redirectAttributes.addFlashAttribute(
+                "mensaje",
+                "Cita confirmada correctamente."
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            redirectAttributes.addFlashAttribute(
+                "error",
+                e.getMessage()
+            );
+        }
 
         return "redirect:/citas";
-
     }
+
+
+    // =========================
+    // CANCELAR CITA
+    // =========================
 
     @GetMapping("/cancelarCita/{id}")
-    public String cancelar(@PathVariable Long id, Authentication authentication) {
+    public String cancelar(
+            @PathVariable Long id,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes) {
 
-        Usuario usuario = usuarioService.obtenerPorCorreo(authentication.getName());
+        try {
 
-        citaService.cancelar(id, usuario);
+            // Obtener usuario autenticado
+            Usuario usuario =
+                usuarioService.obtenerPorCorreo(
+                    authentication.getName()
+                );
+
+            boolean cancelada =
+                citaService.cancelar(id, usuario);
+
+            if (cancelada) {
+
+                redirectAttributes.addFlashAttribute(
+                    "mensaje",
+                    "La cita fue cancelada correctamente."
+                );
+
+            } else {
+
+                redirectAttributes.addFlashAttribute(
+                    "error",
+                    "No tiene permiso para cancelar esta cita."
+                );
+            }
+
+        } catch (IllegalArgumentException e) {
+
+            redirectAttributes.addFlashAttribute(
+                "error",
+                e.getMessage()
+            );
+        }
 
         return "redirect:/citas";
-
     }
-
-    @GetMapping("/mis-citas")
-    public String misCitas(Authentication authentication, Model model) {
-
-    Usuario usuario = usuarioService.obtenerPorCorreo(authentication.getName());
-
-    model.addAttribute(
-            "citas",
-            citaService.obtenerPorUsuario(usuario));
-
-    return "MisCitas";
-    }
-
-   @GetMapping("/horarios/{medicoId}")
-   @ResponseBody
-   public List<Horarios> obtenerHorarios(@PathVariable Long medicoId) {
-
-   return horarioService.obtenerPorMedico(medicoId);
-
-   }
 
 }
