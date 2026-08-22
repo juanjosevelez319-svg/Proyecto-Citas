@@ -9,8 +9,6 @@ import com.hospital.citas.Model.Citas;
 import com.hospital.citas.Model.Citas.EstadoCita;
 import com.hospital.citas.Model.Horarios;
 import com.hospital.citas.Model.Usuario;
-import com.hospital.citas.Service.UsuariosService;
-
 
 public interface CitaRepository extends JpaRepository<Citas, Long> {
 
@@ -18,11 +16,19 @@ public interface CitaRepository extends JpaRepository<Citas, Long> {
 
     List<Citas> findByUsuario(Usuario usuario);
 
+    List<Citas> findByMedicoId(Long idMedico);
+
+    List<Citas> findByUsuarioAndEstadoIn(
+            Usuario usuario,
+            List<Citas.EstadoCita> estados
+    );
+
     List<Citas> findByEstado(EstadoCita estado);
 
-    boolean existsByHorarioAndEstadoIn(Horarios horario, List<Citas.EstadoCita> estados);
-
-    List<Citas> findByMedicoId(Long id);
+    boolean existsByHorarioAndEstadoIn(
+            Horarios horario,
+            List<Citas.EstadoCita> estados
+    );
 
     Optional<Citas> findByHorarioAndEstadoNot(
             Horarios horario,

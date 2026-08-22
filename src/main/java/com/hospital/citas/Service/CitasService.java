@@ -39,28 +39,125 @@ public class CitasService {
     return citaRepository.findByMedicoId(idMedico);
 }
 
-    @Transactional
+    
+
+   @Transactional
     public void guardar(Citas cita) {
 
-        Horarios horario = cita.getHorario();
+      Horarios horario = cita.getHorario();
 
-        boolean ocupado = citaRepository.existsByHorarioAndEstadoIn(
-                horario,
-                Arrays.asList(
-                        EstadoCita.PENDIENTE,
-                        EstadoCita.CONFIRMADA));
-
-        if (ocupado) {
-            throw new RuntimeException("El horario ya fue reservado.");
+      // Validar que exista un horario
+       if (horario == null) {
+        throw new IllegalArgumentException(
+            "Debe seleccionar un horario."
+        );
         }
 
-        horario.setDisponible(false);
+      // Validar que el horario tenga fecha
+      if (horario.getFecha() == null) {
+        throw new IllegalArgumentException(
+            "El horario no tiene una fecha válida."
+        );
+      }
 
-        cita.setEstado(EstadoCita.PENDIENTE);
+      // Validar que tenga horas
+      if (horario.getHoraInicio() == null ||
+        horario.getHoraFin() == null) {
 
-        citaRepository.save(cita);
+        throw new IllegalArgumentException(
+            "El horario no tiene una hora válida."
+        );
+       }
 
+      // El médico de la cita será siempre
+      // el médico dueño del horario
+      cita.setMedico(horario.getMedico());
+
+      // Crear fecha y hora exacta de la cita
+      LocalDateTime inicioCita =
+        LocalDateTime.of(
+            horario.getFecha(),
+            horario.getHoraInicio()
+        );
+
+      LocalDateTime finCita =
+        LocalDateTime.of(
+            horario.getFecha(),
+            horario.getHoraFin()
+        );
+
+      // No permitir citas en el pasado
+      if (!inicioCita.isAfter(LocalDateTime.now())) {
+        throw new IllegalArgumentException(
+            "No se pueden crear citas en una fecha u hora pasada."
+        );
+       }
+
+      // Verificar si el horario ya está ocupado
+       boolean ocupado =
+        citaRepository.existsByHorarioAndEstadoIn(
+            horario,
+            Arrays.asList(
+                EstadoCita.PENDIENTE,
+                EstadoCita.CONFIRMADA
+            )
+        );
+
+      if (ocupado) {
+        throw new IllegalArgumentException(
+            "El horario ya fue reservado."
+        );
+       }
+
+      // Verificar si el usuario tiene otra cita
+      // que se solape en ese mismo horario
+      List<Citas> citasUsuario =
+        citaRepository.findByUsuarioAndEstadoIn(
+            cita.getUsuario(),
+            Arrays.asList(
+                EstadoCita.PENDIENTE,
+                EstadoCita.CONFIRMADA
+            )
+        );
+
+      for (Citas existente : citasUsuario) {
+
+        Horarios horarioExistente = existente.getHorario();
+
+        LocalDateTime inicioExistente =
+            LocalDateTime.of(
+                horarioExistente.getFecha(),
+                horarioExistente.getHoraInicio()
+            );
+
+        LocalDateTime finExistente =
+            LocalDateTime.of(
+                horarioExistente.getFecha(),
+                horarioExistente.getHoraFin()
+            );
+
+        boolean seSolapan =
+            inicioCita.isBefore(finExistente)
+            &&
+            finCita.isAfter(inicioExistente);
+
+        if (seSolapan) {
+            throw new IllegalArgumentException(
+                "El usuario ya tiene una cita activa que se solapa con este horario."
+            );
+        }
     }
+
+    // Marcar horario como ocupado
+    horario.setDisponible(false);
+
+    // Toda nueva cita comienza pendiente
+    cita.setEstado(EstadoCita.PENDIENTE);
+
+    citaRepository.save(cita);
+    }
+
+    
 
     @Transactional
     public void confirmar(Long id) {
