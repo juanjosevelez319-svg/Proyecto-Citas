@@ -54,6 +54,14 @@
 
             </div>
 
+            <div class="d-grid gap-2" sec:authorize="hasRole('ADMIN')">
+
+                <a th:href="@{/reportes/citas}" class="btn btn-primary">
+                    Reportes de citas
+                </a>
+
+            </div>
+
             <div class="text-center mt-4">
 
                 <form th:action="@{/logout}" method="post">
