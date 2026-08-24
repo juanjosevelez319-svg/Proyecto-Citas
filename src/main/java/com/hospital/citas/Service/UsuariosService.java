@@ -35,7 +35,6 @@ public class UsuariosService {
             return null;
         }
 
-        usuario.setRol("ROLE_USUARIO");
         usuario.setActivo(true);
         usuario.setPassword(passwordEncoder.encode(usuario.getPassword()));
 
@@ -83,5 +82,27 @@ public class UsuariosService {
     return usuariosRepository.findByCorreo(correo).orElse(null);
 }
 
+//Recuperar contraseña
+public String recuperarPassword(String correo) {
+
+    Usuario usuario = usuariosRepository.findByCorreo(correo).orElse(null);
+
+    if (usuario == null) {
+        return null;
+    }
+    String nuevaPassword = generarPassword();
+    //Encripta la contraseña antes de guardar
+    usuario.setPassword(passwordEncoder.encode(nuevaPassword));
+
+    usuariosRepository.save(usuario);
+
+    return nuevaPassword;
+}
+//Crea la contraseña temporal
+private String generarPassword() {
+
+    return "temporal123";
+}
    
 }
+   

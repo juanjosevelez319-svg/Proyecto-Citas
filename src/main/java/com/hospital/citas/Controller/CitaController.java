@@ -245,4 +245,21 @@ public class CitaController {
         return "redirect:/citas";
     }
 
+    // Listas citas por usuario
+    @GetMapping("/mis-citas")
+public String misCitas(Model model, Authentication authentication) {
+
+    Usuario usuario = usuarioService.obtenerPorCorreo(
+        authentication.getName()
+    );
+
+    model.addAttribute(
+        "citas",
+        citaService.listarPorUsuario(usuario.getId())
+    );
+
+    return "ListaCitas";
+}
+
+
 }

@@ -26,6 +26,8 @@ public interface CitaRepository extends JpaRepository<Citas, Long> {
             List<Citas.EstadoCita> estados
     );
 
+    List<Citas> findByUsuarioId(Long idUsuario);
+
     List<Citas> findByEstado(EstadoCita estado);
 
     boolean existsByHorarioAndEstadoIn(
@@ -39,27 +41,28 @@ public interface CitaRepository extends JpaRepository<Citas, Long> {
     );
 
     @Query("""
-        SELECT c
-        FROM Citas c
-        WHERE
-            (:fechaInicio IS NULL OR c.horario.fecha >= :fechaInicio)
-            AND
-            (:fechaFin IS NULL OR c.horario.fecha <= :fechaFin)
-            AND
-            (:medicoId IS NULL OR c.medico.id = :medicoId)
-            AND
-            (:especialidad IS NULL OR c.medico.especialidad = :especialidad)
-            AND
-            (:estado IS NULL OR c.estado = :estado)
-            ORDER BY c.horario.fecha ASC, c.horario.horaInicio ASC
-          """)
-    List<Citas> buscarParaReporte(
-            @Param("fechaInicio") LocalDate fechaInicio,
-            @Param("fechaFin") LocalDate fechaFin,
-            @Param("medicoId") Long medicoId,
-            @Param("especialidad") String especialidad,
-            @Param("estado") EstadoCita estado
-        );
+    SELECT c
+    FROM Citas c
+    WHERE
+        (:fechaInicio IS NULL OR c.horario.fecha >= :fechaInicio)
+        AND
+        (:fechaFin IS NULL OR c.horario.fecha <= :fechaFin)
+        AND
+        (:medicoId IS NULL OR c.medico.id = :medicoId)
+        AND
+        (:especialidad IS NULL OR :especialidad = ''
+             OR c.medico.especialidad = :especialidad)
+        AND
+        (:estado IS NULL OR c.estado = :estado)
+        ORDER BY c.horario.fecha ASC, c.horario.horaInicio ASC
+    """)
+List<Citas> buscarParaReporte(
+        @Param("fechaInicio") LocalDate fechaInicio,
+        @Param("fechaFin") LocalDate fechaFin,
+        @Param("medicoId") Long medicoId,
+        @Param("especialidad") String especialidad,
+        @Param("estado") EstadoCita estado
+);
 
 
 }

@@ -30,11 +30,11 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
 
-    .requestMatchers("/login", "/h2-console/**", "/usuarios/nuevo").permitAll()
+    .requestMatchers("/login", "/h2-console/**", "/usuarios/nuevo", "/usuarios/recuperar").permitAll()
 
     .requestMatchers("/inicio").hasRole("ADMIN")
 
-    .requestMatchers("/pantalla-usuarios", "/usuarios/**","/citas/mis-citas","/citas/nuevaCita","/citas/guardarCita",
+    .requestMatchers("/pantalla-usuarios", "/usuarios/**","/citas/*","/citas/mis-citas","/citas/nuevaCita","/citas/guardarCita",
                 "/citas/cancelarCita/**").hasAnyRole("ADMIN","USUARIO")
 
     .anyRequest().hasRole("ADMIN")

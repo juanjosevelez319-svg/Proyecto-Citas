@@ -240,4 +240,9 @@ public class CitasService {
 
     return true;
     }
+
+    // Lista citas por usuario
+    public List<Citas> listarPorUsuario(Long idUsuario) {
+       return citaRepository.findByUsuarioId(idUsuario);
+     }
 }

@@ -87,4 +87,38 @@ public class UsuariosController {
 
     return "redirect:/usuarios";
     }
+
+    @GetMapping("/recuperar")
+public String mostrarRecuperar() {
+
+    return "RecuperarPassword";
+}
+
+@PostMapping("/recuperar")
+public String recuperarPassword(
+        @RequestParam String correo,
+        Model model) {
+
+    String nuevaPassword =
+            usuariosService.recuperarPassword(correo);
+
+    if (nuevaPassword == null) {
+
+        model.addAttribute(
+                "error",
+                "El correo no existe."
+        );
+
+        return "RecuperarPassword";
+    }
+
+    model.addAttribute(
+            "mensaje",
+            "Su nueva contraseña es: " + nuevaPassword
+    );
+
+    return "RecuperarPassword";
+}
+
+
 }
