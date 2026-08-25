@@ -88,11 +88,26 @@ public String guardarHorario(
 
     // Eliminar
     @GetMapping("/eliminarHorario/{id}")
-    public String eliminarHorario(@PathVariable Long id) {
+    public String eliminarHorario(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+
+        try {
 
         horarioService.eliminarHorario(id);
 
-        return "redirect:/horarios";
+        redirectAttributes.addFlashAttribute(
+            "mensaje",
+            "Horario eliminado correctamente."
+        );
+
+    } catch (IllegalArgumentException e) {
+
+        redirectAttributes.addFlashAttribute(
+            "error",
+            e.getMessage()
+        );
+    }
+
+    return "redirect:/horarios";
     }
 
     @GetMapping("/medico/{id}")

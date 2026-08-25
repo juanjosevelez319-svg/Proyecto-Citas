@@ -5,12 +5,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.hospital.citas.Model.Horarios;
+import com.hospital.citas.Repository.CitaRepository;
 import com.hospital.citas.Repository.HorarioRepository;
 
 @Service
 public class HorarioService {
     @Autowired
     private HorarioRepository horarioRepository;
+
+    @Autowired
+    private CitaRepository citaRepository;
 
     // Método para listar todos los horarios
     public List<Horarios> listarHorarios() {
@@ -75,6 +79,23 @@ public class HorarioService {
     }
 
     public void eliminarHorario(Long id) {
-        horarioRepository.deleteById(id);
+        Horarios horario = horarioRepository.findById(id)
+            .orElseThrow(() ->
+                new IllegalArgumentException(
+                    "El horario no existe."
+                )
+            );
+
+    boolean tieneCitas =
+            citaRepository.existsByHorario(horario);
+
+    if (tieneCitas) {
+
+        throw new IllegalArgumentException(
+            "No se puede eliminar este horario porque tiene una cita asociada."
+        );
+    }
+
+    horarioRepository.delete(horario);
     }
 }

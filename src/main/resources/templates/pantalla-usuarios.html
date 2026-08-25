@@ -21,13 +21,18 @@
 
 <body>
 
+
+<!-- ========================= -->
+<!-- HEADER -->
+<!-- ========================= -->
+
 <header class="header">
 
     <h2>
         Hospital Citas
     </h2>
 
-    <a th:href="@{/pantalla-usuarios}">
+    <a th:href="@{/inicio}">
         Inicio
     </a>
 
@@ -46,6 +51,10 @@
 </header>
 
 
+<!-- ========================= -->
+<!-- CONTENIDO -->
+<!-- ========================= -->
+
 <main class="contenido">
 
     <div class="container mt-5">
@@ -55,9 +64,6 @@
             <div class="col-md-6">
 
                 <div class="card shadow">
-
-
-                    <!-- ENCABEZADO -->
 
                     <div class="card-header bg-success text-white text-center">
 
@@ -69,9 +75,6 @@
 
 
                     <div class="card-body">
-
-
-                        <!-- BIENVENIDA -->
 
                         <h4 class="text-center mb-3">
 
@@ -94,10 +97,10 @@
                         </p>
 
 
-                        <!-- USUARIOS -->
+                        <!-- ADMINISTRAR USUARIO -->
 
                         <div class="d-grid mb-3"
-                             sec:authorize="hasRole('ROLE_USUARIO')">
+                             sec:authorize="hasRole('USUARIO')">
 
                             <a th:href="@{/usuarios}"
                                class="btn btn-success">
@@ -112,12 +115,12 @@
                         <!-- CITAS -->
 
                         <div class="d-grid mb-3"
-                             sec:authorize="hasRole('ROLE_USUARIO')">
+                             sec:authorize="hasRole('USUARIO')">
 
                             <a th:href="@{/citas/mis-citas}"
                                class="btn btn-success">
 
-                                Mis Citas
+                                Citas
 
                             </a>
 
@@ -155,6 +158,10 @@
 
 </main>
 
+
+<!-- ========================= -->
+<!-- FOOTER -->
+<!-- ========================= -->
 
 <footer class="footer">
 

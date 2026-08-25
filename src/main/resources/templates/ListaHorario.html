@@ -47,6 +47,25 @@
 
         <h2>Horarios de los médicos</h2>
 
+        <div th:if="${mensaje}"
+     class="alert alert-success alert-dismissible fade show"
+     role="alert">
+
+    <strong>Éxito:</strong>
+    <span th:text="${mensaje}"></span>
+
+    <button type="button"
+            class="btn-close"
+            data-bs-dismiss="alert">
+    </button>
+
+</div>
+
+
+ 
+
+
+
         <div>
 
             <a th:href="@{/nuevoHorario}"

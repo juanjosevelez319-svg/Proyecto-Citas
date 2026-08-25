@@ -380,6 +380,23 @@
                 Resultados del reporte
             </h4>
 
+            <div th:if="${!#lists.isEmpty(citas)}">
+
+    <a th:href="@{/reportes/citas/csv(
+            fechaInicio=${fechaInicio},
+            fechaFin=${fechaFin},
+            medicoId=${medicoSeleccionado},
+            especialidad=${especialidadSeleccionada},
+            estado=${estadoSeleccionado}
+        )}"
+       class="btn btn-success">
+
+        Descargar CSV
+
+    </a>
+
+</div>
+
         </div>
 
 

@@ -40,6 +40,9 @@ public interface CitaRepository extends JpaRepository<Citas, Long> {
             Citas.EstadoCita estado
     );
 
+    boolean existsByHorario(Horarios horario);
+
+    
     @Query("""
     SELECT c
     FROM Citas c

@@ -108,11 +108,7 @@ public class CitaController {
                 authentication.getName()
             );
 
-        /*
-         * Si el usuario es ADMIN:
-         * se utiliza el usuario seleccionado
-         * en el formulario.
-         */
+        // Validar que el usuario tenga rol de ADMIN o USER
         if (usuarioActual.getRol().equals("ROLE_ADMIN")) {
 
             if (cita.getUsuario() == null ||
@@ -139,10 +135,7 @@ public class CitaController {
 
         } else {
 
-            /*
-             * Los usuarios normales solamente
-             * pueden crear citas para ellos mismos.
-             */
+
             cita.setUsuario(usuarioActual);
         }
 

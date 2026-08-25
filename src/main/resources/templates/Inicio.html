@@ -121,6 +121,18 @@
 
             </div>
 
+            <div class="d-grid gap-2 mt-2"
+                 sec:authorize="hasRole('ADMIN')">
+
+                <a th:href="@{/reportes/citas}"
+                   class="btn btn-primary">
+
+                    Reportes de Citas
+
+                </a>
+
+            </div>
+
 
             <!-- CERRAR SESIÓN -->
 
