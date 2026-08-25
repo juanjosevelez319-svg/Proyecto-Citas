@@ -34,6 +34,7 @@ Desarrollar una aplicación que permita administrar de manera segura las citas m
 
 - Registro de usuarios.
 - Inicio de sesión.
+- Recuperación de contraseña mediante correo electrónico registrado.
 - Edición de información.
 - Eliminación de usuarios (solo administrador).
 - Contraseñas almacenadas utilizando BCrypt.
@@ -44,6 +45,7 @@ Desarrollar una aplicación que permita administrar de manera segura las citas m
 - Editar médicos.
 - Eliminar médicos.
 - Consultar médicos registrados.
+- Consultar los horarios asociados a un médico específico.
 
 ### Gestión de horarios
 
@@ -60,6 +62,12 @@ Desarrollar una aplicación que permita administrar de manera segura las citas m
 - Cancelar citas.
 - Visualizar citas registradas.
 
+### Reportes de citas
+
+- Panel de reportes con filtros combinables por rango de fechas, médico, estado de la cita y especialidad.
+- Resumen del reporte con el total de citas encontradas y su distribución por estado (pendientes, confirmadas y canceladas).
+- Exportación del reporte filtrado a un archivo CSV (reporte_citas.csv), compatible con programas de hojas de cálculo como Excel o Google Sheets.
+
 ---
 
 ## Seguridad
@@ -75,6 +83,7 @@ Puede:
 - Administrar horarios.
 - Confirmar citas.
 - Cancelar cualquier cita.
+- Generar y exportar reportes de citas.
 - Visualizar toda la información.
 
 ### Usuario
@@ -83,6 +92,7 @@ Puede:
 
 - Registrarse.
 - Iniciar sesión.
+- Recuperar su contraseña.
 - Consultar y editar su información.
 - Crear citas.
 - Cancelar sus propias citas.
@@ -98,6 +108,7 @@ Puede:
 - Un usuario únicamente puede editar su propia información.
 - Solo un administrador puede eliminar usuarios.
 - El acceso a cada módulo depende del rol del usuario autenticado.
+- El reporte de citas solo devuelve resultados que cumplan simultáneamente con todos los filtros seleccionados.
 
 ---
 
@@ -112,6 +123,7 @@ src
 │   ├── InicioController
 │   ├── LoginController
 │   ├── MedicoController
+│   ├── ReporteController
 │   └── UsuariosController
 │
 ├── Model
@@ -130,7 +142,8 @@ src
 │   ├── UsuariosService
 │   ├── MedicoService
 │   ├── HorarioService
-│   └── CitasService
+│   ├── CitasService
+│   └── ReporteService
 │
 ├── Security
 │   ├── LoginSuccessHandler
@@ -157,7 +170,7 @@ Configuración:
 
 
 JDBC URL:
-jdbc:h2:~/test
+jdbc:h2:file:./citasdb
 
 Usuario:
 sa
