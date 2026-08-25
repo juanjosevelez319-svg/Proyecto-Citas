@@ -43,10 +43,6 @@ public class CitaController {
 
     }
 
-    // =========================
-    // LISTAR CITAS
-    // =========================
-
     @GetMapping
     public String listarCitas(Model model) {
 
@@ -58,10 +54,6 @@ public class CitaController {
         return "ListaCitas";
     }
 
-
-    // =========================
-    // NUEVA CITA
-    // =========================
 
     @GetMapping("/nuevaCita")
     public String nuevaCita(Model model) {
@@ -90,10 +82,6 @@ public class CitaController {
     }
 
 
-    // =========================
-    // GUARDAR CITA
-    // =========================
-
     @PostMapping("/guardarCita")
     public String guardar(
         @ModelAttribute Citas cita,
@@ -110,7 +98,7 @@ public class CitaController {
 
         // Validar que el usuario tenga rol de ADMIN o USER
         if (usuarioActual.getRol().equals("ROLE_ADMIN")) {
-
+           // Si es ADMIN, puede seleccionar cualquier usuario para la cita
             if (cita.getUsuario() == null ||
                 cita.getUsuario().getId() == null) {
 
@@ -123,7 +111,7 @@ public class CitaController {
                 usuarioService.obtenerPorId(
                     cita.getUsuario().getId()
                 );
-
+             // Validar que el usuario seleccionado exista
             if (usuarioSeleccionado == null) {
 
                 throw new IllegalArgumentException(
@@ -161,19 +149,15 @@ public class CitaController {
     }
 
 
-    // =========================
-    // CONFIRMAR CITA
-    // =========================
-
     @GetMapping("/confirmarCita/{id}")
     public String confirmar(
             @PathVariable Long id,
             RedirectAttributes redirectAttributes) {
-
+        // Confirmar la cita con el id proporcionado
         try {
 
             citaService.confirmar(id);
-
+            // Mostrar mensaje de éxito
             redirectAttributes.addFlashAttribute(
                 "mensaje",
                 "Cita confirmada correctamente."
@@ -191,10 +175,6 @@ public class CitaController {
     }
 
 
-    // =========================
-    // CANCELAR CITA
-    // =========================
-
     @GetMapping("/cancelarCita/{id}")
     public String cancelar(
             @PathVariable Long id,
@@ -211,7 +191,7 @@ public class CitaController {
 
             boolean cancelada =
                 citaService.cancelar(id, usuario);
-
+            // Mostrar mensaje según si se pudo cancelar o no
             if (cancelada) {
 
                 redirectAttributes.addFlashAttribute(
@@ -220,7 +200,7 @@ public class CitaController {
                 );
 
             } else {
-
+                // Si no se pudo cancelar, mostrar mensaje de error
                 redirectAttributes.addFlashAttribute(
                     "error",
                     "No tiene permiso para cancelar esta cita."

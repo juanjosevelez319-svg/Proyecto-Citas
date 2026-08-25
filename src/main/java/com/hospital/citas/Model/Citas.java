@@ -28,7 +28,7 @@ public class Citas {
 
     @Enumerated(EnumType.STRING)
     private EstadoCita estado;
-
+    // Enumeración para representar el estado de la cita
     public enum EstadoCita {
 
     PENDIENTE,
@@ -36,9 +36,10 @@ public class Citas {
     CANCELADA
 
     }
+    // Constructor vacío requerido por JPA
     public Citas() {
     }
-
+    // getters y setters para los campos de la clase
     public Long getId() {
         return id;
     }

@@ -62,7 +62,7 @@ public class HorarioService {
             horario.getHoraInicio().isBefore(existente.getHoraFin())
             &&
             horario.getHoraFin().isAfter(existente.getHoraInicio());
-
+        // Si hay solapamiento, lanzamos una excepción
         if (seSolapan) {
             throw new IllegalArgumentException(
                 "El médico ya tiene un horario que se solapa con ese horario."
@@ -72,23 +72,24 @@ public class HorarioService {
 
     horarioRepository.save(horario);
     }
-
+    // Método para buscar un horario por su ID
     public Horarios buscarHorario(Long id) {
         return horarioRepository.findById(id)
                 .orElse(null);
     }
-
+    // Método para eliminar un horario por su ID
     public void eliminarHorario(Long id) {
+        // Verificar si el horario existe
         Horarios horario = horarioRepository.findById(id)
             .orElseThrow(() ->
                 new IllegalArgumentException(
                     "El horario no existe."
                 )
             );
-
+    // Verificar si el horario tiene citas asociadas
     boolean tieneCitas =
             citaRepository.existsByHorario(horario);
-
+    // Si el horario tiene citas asociadas, no se puede eliminar
     if (tieneCitas) {
 
         throw new IllegalArgumentException(

@@ -39,10 +39,10 @@ public interface CitaRepository extends JpaRepository<Citas, Long> {
             Horarios horario,
             Citas.EstadoCita estado
     );
-
+    // Método para verificar si existe una cita con un horario específico
     boolean existsByHorario(Horarios horario);
 
-    
+    // Query para buscar citas con filtros opcionales
     @Query("""
     SELECT c
     FROM Citas c
@@ -59,7 +59,7 @@ public interface CitaRepository extends JpaRepository<Citas, Long> {
         (:estado IS NULL OR c.estado = :estado)
         ORDER BY c.horario.fecha ASC, c.horario.horaInicio ASC
     """)
-List<Citas> buscarParaReporte(
+       List<Citas> buscarParaReporte(
         @Param("fechaInicio") LocalDate fechaInicio,
         @Param("fechaFin") LocalDate fechaFin,
         @Param("medicoId") Long medicoId,

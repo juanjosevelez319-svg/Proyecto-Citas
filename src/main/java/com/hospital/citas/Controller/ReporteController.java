@@ -58,6 +58,7 @@ System.out.println("Especialidad: " + especialidad);
 System.out.println("Estado: " + estado);
 System.out.println("=============================");
 
+// Normalizar especialidad: si es una cadena vacía, convertirla a null
 if (especialidad != null && especialidad.isBlank()) {
     especialidad = null;
 }
@@ -161,7 +162,7 @@ List<Citas> citas =
 
 
     @GetMapping("/citas/csv")
-public ResponseEntity<byte[]> exportarCSV(
+    public ResponseEntity<byte[]> exportarCSV(
 
         @RequestParam(required = false)
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

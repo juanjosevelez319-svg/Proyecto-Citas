@@ -60,7 +60,7 @@ public class UsuariosController {
      public String editarUsuario(@PathVariable Long id, Model model, Principal principal) {
 
      Usuario usuarioLogueado = usuariosService.obtenerPorCorreo(principal.getName());
-
+     // Verificar si el usuario logueado es administrador o si está editando su propio perfil
      if (!usuarioLogueado.getRol().equals("ROLE_ADMIN")
             && !usuarioLogueado.getId().equals(id)) {
 
@@ -78,7 +78,8 @@ public class UsuariosController {
                               Principal principal) {
 
       Usuario usuarioLogueado = usuariosService.obtenerPorCorreo(principal.getName());
-
+    // Verificar si el usuario logueado es administrador
+    // Si no es administrador, redirigir a la lista de usuarios
      if (!usuarioLogueado.getRol().equals("ROLE_ADMIN")) {
         return "redirect:/usuarios";
       }
@@ -101,7 +102,7 @@ public String recuperarPassword(
 
     String nuevaPassword =
             usuariosService.recuperarPassword(correo);
-
+     // Si la nueva contraseña es null, significa que el correo no existe
     if (nuevaPassword == null) {
 
         model.addAttribute(

@@ -34,7 +34,7 @@ public class ReporteService {
             );
         }
 
-
+        
         return citaRepository.buscarParaReporte(
                 fechaInicio,
                 fechaFin,

@@ -102,7 +102,7 @@ public class CitasService {
                 EstadoCita.CONFIRMADA
             )
         );
-
+      // Si el horario ya está ocupado, lanzar excepción
       if (ocupado) {
         throw new IllegalArgumentException(
             "El horario ya fue reservado."
@@ -119,11 +119,11 @@ public class CitasService {
                 EstadoCita.CONFIRMADA
             )
         );
-
+      // Validar que el usuario no tenga otra cita en el mismo horario
       for (Citas existente : citasUsuario) {
 
         Horarios horarioExistente = existente.getHorario();
-
+        // Validar que el horario existente tenga fecha y hora
         LocalDateTime inicioExistente =
             LocalDateTime.of(
                 horarioExistente.getFecha(),
@@ -135,12 +135,12 @@ public class CitasService {
                 horarioExistente.getFecha(),
                 horarioExistente.getHoraFin()
             );
-
+        // Comprobar si hay solapamiento
         boolean seSolapan =
             inicioCita.isBefore(finExistente)
             &&
             finCita.isAfter(inicioExistente);
-
+        // Si hay solapamiento, lanzamos una excepción
         if (seSolapan) {
             throw new IllegalArgumentException(
                 "El usuario ya tiene una cita activa que se solapa con este horario."
@@ -163,7 +163,7 @@ public class CitasService {
     public void confirmar(Long id) {
 
         Citas cita = citaRepository.findById(id).orElseThrow();
-
+        // Solo se pueden confirmar citas pendientes
         if (cita.getEstado() == EstadoCita.PENDIENTE) {
 
             cita.setEstado(EstadoCita.CONFIRMADA);
@@ -176,11 +176,13 @@ public class CitasService {
 
     @Transactional
     public boolean cancelar(Long id, Usuario usuario) {
+        // Buscar la cita por su ID
         Citas cita = citaRepository.findById(id).orElse(null);
+        // Si no existe la cita, retornar false
         if (cita == null) {
             return false;
         }
-
+        // Verificar si el usuario tiene permiso para cancelar la cita
         if (!usuario.getRol().equals("ROLE_ADMIN")) {
             if (!cita.getUsuario().getId().equals(usuario.getId())) {
               return false;
